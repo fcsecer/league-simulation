@@ -1,0 +1,19 @@
+<p-table [value]="(teams$ | async)!" [paginator]="true" [rows]="10">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Takım</th>
+        <th>Oynanan Maç</th>
+        <th>Puan</th>
+        <th>Averaj</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-team>
+      <tr>
+        <td>{{ team.name }}</td>
+        <td>{{ team.matchesPlayed }}</td>
+        <td>{{ team.points }}</td>
+        <td>{{ team.goalDifference }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+  
