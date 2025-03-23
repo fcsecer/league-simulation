@@ -6,12 +6,13 @@ import { LeagueState } from '../state/league/league.state';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { InitializeLeague, PlayAllMatches, PlayNextWeek } from '../state/league/league.action';
+import { EditMatchResult, InitializeLeague, PlayAllMatches, PlayNextWeek } from '../state/league/league.action';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-league-table',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule],
+  imports: [CommonModule, TableModule, ButtonModule,FormsModule],
   templateUrl: './league-table.component.html',
 })
 export class LeagueTableComponent implements OnInit {
@@ -20,30 +21,26 @@ export class LeagueTableComponent implements OnInit {
   currentWeek: number = 1;
   championPredictions$: Observable<{ team: Team; chance: number; }[]> | undefined;
   championChances: Map<number, number> = new Map();
+  editableMatches$: Observable<Match[]> | undefined;
   constructor(private store: Store) {
     this.teams$ = this.store.select(LeagueState.getTeams);
   }
 
   ngOnInit() {
     this.store.dispatch(new InitializeLeague()).subscribe(() => {
-      this.store.selectOnce(LeagueState.getCurrentWeek).subscribe(currentWeek => {
-        this.currentWeek = currentWeek;
-        this.loadMatches();
-        this.loadChampionPredictions();
-      });
+      this.reloadAll();
     });
   }
   
-  playNextWeek() {
-    this.store.dispatch(new PlayNextWeek()).subscribe(() => {
-      this.store.selectOnce(LeagueState.getCurrentWeek).subscribe(currentWeek => {
-        this.currentWeek = currentWeek - 1;
-        this.loadMatches();
-        this.loadChampionPredictions();
-      });
+  reloadAll() {
+    this.store.selectOnce(LeagueState.getCurrentWeek).subscribe(week => {
+      this.currentWeek = week;
+      this.loadMatches();
+      this.loadEditableMatches();
+      this.loadChampionPredictions();
+      this.teams$ = this.store.select(LeagueState.getTeams);
+      this.teams$.subscribe((val)=>console.log("first",val))
     });
-    
-    this.currentMatches$?.subscribe((val)=> console.log(val))
   }
   playAll() {
     this.store.dispatch(new PlayAllMatches()).subscribe(() => {
@@ -54,6 +51,23 @@ export class LeagueTableComponent implements OnInit {
       });
     });
   }
+
+  playNextWeek() {
+    this.store.dispatch(new PlayNextWeek()).subscribe(() => this.reloadAll());
+  }
+  
+  editMatch(match: Match) {
+    const updated = {
+      ...match, // homeTeamId, awayTeamId, week vs. zaten var
+      played: true // garanti olsun
+    };
+  
+    this.store.dispatch(new EditMatchResult(updated)).subscribe(() => {
+      this.reloadAll(); // tüm verileri yenile
+    });
+  }
+  
+
   loadChampionPredictions() {
     if (this.currentWeek >= 4) {
       this.championPredictions$ = this.store.select(LeagueState.getChampionPredictions);
@@ -66,7 +80,23 @@ export class LeagueTableComponent implements OnInit {
     }
   }
   loadMatches() {
-    const selectorFn = this.store.selectSnapshot(LeagueState.getPlayedMatchesByWeek);
-    this.currentMatches$ = of(selectorFn(this.currentWeek));
+    const selectorFn = this.store.selectSnapshot(
+      LeagueState.getPlayedMatchesByWeek
+    );
+    this.currentMatches$ = new Observable((observer) => {
+      observer.next(selectorFn(this.currentWeek));
+      observer.complete();
+    });
   }
+  loadEditableMatches() {
+    this.editableMatches$ = this.store.select(
+      LeagueState.getAllPlayedMatches
+    );
+  }
+
+  getTeamName(id: number): string {
+    const teams = this.store.selectSnapshot(LeagueState.getTeams);
+    return teams.find(t => t.id === id)?.name || '???';
+  }
+
 }

@@ -10,10 +10,11 @@ export interface Team {
 }
 
 export interface Match {
-  homeTeam: Team;
-  awayTeam: Team;
+  homeTeamId: number;
+  awayTeamId: number;
   homeGoals: number;
   awayGoals: number;
   week: number;
   played: boolean;
 }
+

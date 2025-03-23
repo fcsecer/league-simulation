@@ -18,13 +18,14 @@ export class MatchSimulatorService {
         const away = teamList[teamCount - 1 - i];
 
         fixture.push({
-          homeTeam: home,
-          awayTeam: away,
+          homeTeamId: home.id,
+          awayTeamId: away.id,
           homeGoals: 0,
           awayGoals: 0,
           week: week + 1,
           played: false,
         });
+        
       }
 
       // Takımları doğru şekilde rotasyona sokalım
