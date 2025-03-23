@@ -1,4 +1,4 @@
-import { Team } from "../app/state/league/league.model";
+import { Team } from "../app/store/league/league.model";
 
 export const teams: Team[] = [
     {

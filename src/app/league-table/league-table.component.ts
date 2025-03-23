@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { Observable, map, of } from 'rxjs';
-import { Team, Match } from '../state/league/league.model';
-import { LeagueState } from '../state/league/league.state';
+import { Team, Match } from '../store/league/league.model';
+import { LeagueState } from '../store/league/league.state';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { EditMatchResult, InitializeLeague, PlayAllMatches, PlayNextWeek, ResetLeague } from '../state/league/league.action';
+import { EditMatchResult, InitializeLeague, PlayAllMatches, PlayNextWeek, ResetLeague } from '../store/league/league.action';
 import { FormsModule } from '@angular/forms';
 import { InputNumberModule } from 'primeng/inputnumber';
 
