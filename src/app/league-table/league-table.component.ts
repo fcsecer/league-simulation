@@ -66,7 +66,7 @@ export class LeagueTableComponent implements OnInit {
   
 
   loadChampionPredictions() {
-    if (this.currentWeek >= 4) {
+    if (this.currentWeek >= 5) {
       this.championPredictions$ = this.store.select(LeagueState.getChampionPredictions);
       this.store.selectOnce(LeagueState.getChampionPredictions).subscribe(predictions => {
         this.championChances = new Map(predictions.map(p => [p.team.id, p.chance]));
