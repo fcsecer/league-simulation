@@ -10,7 +10,7 @@ export class MatchSimulatorService {
     const totalWeeks = teamCount - 1;
     const matchesPerWeek = teamCount / 2;
 
-    const teamList = [...teams]; // teams dizisini koru, mutasyona uğratma!
+    const teamList = [...teams];
 
     for (let week = 0; week < totalWeeks; week++) {
       for (let i = 0; i < matchesPerWeek; i++) {
@@ -28,7 +28,6 @@ export class MatchSimulatorService {
         
       }
 
-      // Takımları doğru şekilde rotasyona sokalım
       teamList.splice(1, 0, teamList.pop()!);
     }
 
@@ -57,6 +56,6 @@ export class MatchSimulatorService {
   }
 
   private randomGoal(): number {
-    return Math.floor(Math.random() * 10); // Düzeltildi (0-4 arası)
+    return Math.floor(Math.random() * 10); 
   }
 }

@@ -6,7 +6,7 @@ import { LeagueState } from '../state/league/league.state';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { EditMatchResult, InitializeLeague, PlayAllMatches, PlayNextWeek } from '../state/league/league.action';
+import { EditMatchResult, InitializeLeague, PlayAllMatches, PlayNextWeek, ResetLeague } from '../state/league/league.action';
 import { FormsModule } from '@angular/forms';
 import { InputNumberModule } from 'primeng/inputnumber';
 
@@ -15,6 +15,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
   standalone: true,
   imports: [CommonModule, TableModule, ButtonModule,FormsModule,InputNumberModule],
   templateUrl: './league-table.component.html',
+  styleUrls: ['./league-table.component.scss'],
 })
 export class LeagueTableComponent implements OnInit {
   teams$: Observable<Team[]>;
@@ -69,15 +70,21 @@ export class LeagueTableComponent implements OnInit {
       this.championChances.clear();
     }
   }
+  resetLeague() {
+    this.store.dispatch(new ResetLeague());
+    this.currentWeek=0
+    this.championPredictions$ = undefined!;
+      this.championChances.clear();
+  }
+  
   loadMatches() {
-    const selectorFn = this.store.selectSnapshot(
-      LeagueState.getPlayedMatchesByWeek
-    );
+    const selectorFn = this.store.selectSnapshot(LeagueState.getPlayedMatchesByWeek);
     this.currentMatches$ = new Observable((observer) => {
-      observer.next(selectorFn(this.currentWeek));
+      observer.next(selectorFn(this.currentWeek - 1));
       observer.complete();
     });
   }
+  
   loadEditableMatches() {
     this.editableMatches$ = this.store.select(
       LeagueState.getAllPlayedMatches

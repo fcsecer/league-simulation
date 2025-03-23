@@ -23,3 +23,7 @@ export class EditMatchResult {
   static readonly type = '[League] Edit Match Result';
   constructor(public payload: Match) {}
 }
+
+export class ResetLeague {
+  static readonly type = '[League] Reset League';
+}
