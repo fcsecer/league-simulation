@@ -18,7 +18,8 @@ export class LeagueTableComponent implements OnInit {
   teams$: Observable<Team[]>;
   currentMatches$: Observable<Match[]> | undefined;
   currentWeek: number = 1;
-
+  championPredictions$: Observable<{ team: Team; chance: number; }[]> | undefined;
+  championChances: Map<number, number> = new Map();
   constructor(private store: Store) {
     this.teams$ = this.store.select(LeagueState.getTeams);
   }
@@ -28,6 +29,7 @@ export class LeagueTableComponent implements OnInit {
       this.store.selectOnce(LeagueState.getCurrentWeek).subscribe(currentWeek => {
         this.currentWeek = currentWeek;
         this.loadMatches();
+        this.loadChampionPredictions();
       });
     });
   }
@@ -37,6 +39,7 @@ export class LeagueTableComponent implements OnInit {
       this.store.selectOnce(LeagueState.getCurrentWeek).subscribe(currentWeek => {
         this.currentWeek = currentWeek - 1;
         this.loadMatches();
+        this.loadChampionPredictions();
       });
     });
     
@@ -47,8 +50,20 @@ export class LeagueTableComponent implements OnInit {
       this.store.selectOnce(LeagueState.getCurrentWeek).subscribe(currentWeek => {
         this.currentWeek = currentWeek - 1;
         this.loadMatches();
+        this.loadChampionPredictions();
       });
     });
+  }
+  loadChampionPredictions() {
+    if (this.currentWeek >= 4) {
+      this.championPredictions$ = this.store.select(LeagueState.getChampionPredictions);
+      this.store.selectOnce(LeagueState.getChampionPredictions).subscribe(predictions => {
+        this.championChances = new Map(predictions.map(p => [p.team.id, p.chance]));
+      });
+    } else {
+      this.championPredictions$ = undefined!;
+      this.championChances.clear();
+    }
   }
   loadMatches() {
     const selectorFn = this.store.selectSnapshot(LeagueState.getPlayedMatchesByWeek);

@@ -75,6 +75,46 @@ export class LeagueState {
         losses: 0,
         draws: 0,
       },
+      {
+        id: 5,
+        name: 'Çaykur Rizespor',
+        points: 0,
+        goalDifference: 0,
+        matchesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+      },
+      {
+        id: 6,
+        name: 'Samsunspor',
+        points: 0,
+        goalDifference: 0,
+        matchesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+      },
+      {
+        id: 7,
+        name: 'Kayserispor',
+        points: 0,
+        goalDifference: 0,
+        matchesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+      },
+      {
+        id: 8,
+        name: 'Adana Demirspor',
+        points: 0,
+        goalDifference: 0,
+        matchesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+      },
     ];
 
     const fixture = this.simulator.generateFixture([...teams]);
@@ -173,4 +213,52 @@ export class LeagueState {
   static getCurrentWeek(state: LeagueStateModel): number {
     return state.currentWeek;
   }
+
+  @Selector()
+static getChampionPredictions(state: LeagueStateModel): { team: Team; chance: number }[] {
+  const teams = [...state.teams];
+  const totalWeeks = Math.max(...state.matches.map(m => m.week));
+  const remainingWeeks = totalWeeks - state.currentWeek + 1;
+  const maxPointsLeft = remainingWeeks * 3;
+
+  const potentials = teams.map(team => ({
+    team,
+    maxReachablePoints: team.points + maxPointsLeft
+  }));
+
+  const currentLeaderPoints = Math.max(...teams.map(t => t.points));
+
+  // 1. Aşama: Matematiksel olarak elenenleri %0 yap
+  const possibleWinners = potentials.filter(p => p.maxReachablePoints >= currentLeaderPoints);
+
+  // Şampiyon netleşmişse (tek kişi en yüksek puanda ve kimse geçemiyor)
+  const topTeam = teams.find(t => t.points === currentLeaderPoints);
+  const onlyTopTeamCanWin = possibleWinners.length === 1 && possibleWinners[0].team.id === topTeam?.id;
+
+  if (onlyTopTeamCanWin && remainingWeeks === 0) {
+    return teams.map(team => ({
+      team,
+      chance: team.id === topTeam?.id ? 100 : 0
+    }));
+  }
+
+  // 2. Aşama: Normalize edilmiş olasılıkları hesapla
+  const totalReachable = possibleWinners.reduce((sum, t) => sum + t.maxReachablePoints, 0);
+
+  const predictions = teams.map(team => {
+    const matching = possibleWinners.find(p => p.team.id === team.id);
+    const chance = matching
+      ? Math.round((matching.maxReachablePoints / totalReachable) * 100)
+      : 0;
+
+    return {
+      team,
+      chance,
+    };
+  });
+
+  return predictions.sort((a, b) => b.chance - a.chance);
+}
+
+
 }

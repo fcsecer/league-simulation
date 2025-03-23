@@ -10,7 +10,7 @@
 
 <button pButton type="button" label="Sonraki Hafta" (click)="playNextWeek()"></button>
 
-<p-table [value]="(teams$ | async)!">
+<p-table [value]="(teams$ | async)!" [responsiveLayout]="'scroll'">
   <ng-template pTemplate="header">
     <tr>
       <th>Takım</th>
@@ -22,8 +22,14 @@
       <th>Puan</th>
     </tr>
   </ng-template>
+
   <ng-template pTemplate="body" let-team>
-    <tr>
+    <tr
+    [ngStyle]="{
+      'background-color': championChances.get(team.id) === 0 ? '#ffe5e5' : 'transparent'
+    }"
+    [title]="championChances.get(team.id) === 0 ? 'Şampiyonluk şansı kalmadı' : ''"
+    >
       <td>{{ team.name }}</td>
       <td>{{ team.matchesPlayed }}</td>
       <td>{{ team.wins }}</td>
@@ -34,3 +40,23 @@
     </tr>
   </ng-template>
 </p-table>
+
+
+
+<div *ngIf="championPredictions$ | async as predictions">
+  <h3>{{ currentWeek }}. Hafta Şampiyonluk Tahminleri</h3>
+  <p-table [value]="predictions">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Takım</th>
+        <th>Şampiyonluk İhtimali</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-row>
+      <tr>
+        <td>{{ row.team.name }}</td>
+        <td>%{{ row.chance }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
