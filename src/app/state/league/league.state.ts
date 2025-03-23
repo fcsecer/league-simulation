@@ -1,6 +1,6 @@
 import { State, Action, StateContext, Selector } from '@ngxs/store';
 import { Team, Match } from './league.model';
-import { InitializeLeague, PlayNextWeek } from './league.action';
+import { InitializeLeague, PlayAllMatches, PlayNextWeek } from './league.action';
 import { Injectable } from '@angular/core';
 import { MatchSimulatorService } from '../../services/math-simulator.service';
 
@@ -27,16 +27,54 @@ export class LeagueState {
 
   @Selector()
   static getCurrentWeekMatches(state: LeagueStateModel): Match[] {
-    return state.matches.filter(m => m.week === state.currentWeek && m.played);
+    return state.matches.filter(
+      (m) => m.week === state.currentWeek && m.played
+    );
   }
 
   @Action(InitializeLeague)
   initializeLeague(ctx: StateContext<LeagueStateModel>) {
     const teams: Team[] = [
-      { id: 1, name: 'Beşiktaş', points: 0, goalDifference: 0, matchesPlayed: 0, wins: 0, losses: 0, draws: 0 },
-      { id: 2, name: 'Fenerbahçe', points: 0, goalDifference: 0, matchesPlayed: 0, wins: 0, losses: 0, draws: 0 },
-      { id: 3, name: 'Galatasaray', points: 0, goalDifference: 0, matchesPlayed: 0, wins: 0, losses: 0, draws: 0 },
-      { id: 4, name: 'Trabzonspor', points: 0, goalDifference: 0, matchesPlayed: 0, wins: 0, losses: 0, draws: 0 },
+      {
+        id: 1,
+        name: 'Beşiktaş',
+        points: 0,
+        goalDifference: 0,
+        matchesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+      },
+      {
+        id: 2,
+        name: 'Fenerbahçe',
+        points: 0,
+        goalDifference: 0,
+        matchesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+      },
+      {
+        id: 3,
+        name: 'Galatasaray',
+        points: 0,
+        goalDifference: 0,
+        matchesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+      },
+      {
+        id: 4,
+        name: 'Trabzonspor',
+        points: 0,
+        goalDifference: 0,
+        matchesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+      },
     ];
 
     const fixture = this.simulator.generateFixture([...teams]);
@@ -47,34 +85,68 @@ export class LeagueState {
   @Action(PlayNextWeek)
   playNextWeek(ctx: StateContext<LeagueStateModel>) {
     const state = ctx.getState();
-    const matchesThisWeek = this.simulator.simulateWeek(state.matches, state.currentWeek);
+    const matchesThisWeek = this.simulator.simulateWeek(
+      state.matches,
+      state.currentWeek
+    );
 
-    const updatedTeams = state.teams.map(team => ({ ...team }));
+    const updatedTeams = state.teams.map((team) => ({ ...team }));
 
-    matchesThisWeek.forEach(match => {
+    matchesThisWeek.forEach((match) => {
       this.updateStats(updatedTeams, match);
     });
 
     ctx.patchState({
       teams: updatedTeams,
-      matches: state.matches.map(match => 
-        matchesThisWeek.find(m => m.homeTeam.id === match.homeTeam.id && m.week === match.week) || match
+      matches: state.matches.map(
+        (match) =>
+          matchesThisWeek.find(
+            (m) => m.homeTeam.id === match.homeTeam.id && m.week === match.week
+          ) || match
       ),
       currentWeek: state.currentWeek + 1,
     });
   }
-
-  private updateStats(teams: Team[], match: Match) {
-    const home = teams.find(t => t.id === match.homeTeam.id);
-    const away = teams.find(t => t.id === match.awayTeam.id);
+  @Action(PlayAllMatches)
+  playAllMatches(ctx: StateContext<LeagueStateModel>) {
+    const state = ctx.getState();
+    const totalWeeks = Math.max(...state.matches.map(m => m.week)); // max hafta sayısı
+    const updatedTeams = state.teams.map(team => ({ ...team }));
+    let updatedMatches = [...state.matches];
   
+    for (let week = state.currentWeek; week <= totalWeeks; week++) {
+      const matchesThisWeek = this.simulator.simulateWeek(updatedMatches, week);
+      matchesThisWeek.forEach(match => this.updateStats(updatedTeams, match));
+  
+      // her haftanın maç sonuçlarını replace et
+      updatedMatches = updatedMatches.map(match =>
+        matchesThisWeek.find(
+          m =>
+            m.week === match.week &&
+            m.homeTeam.id === match.homeTeam.id &&
+            m.awayTeam.id === match.awayTeam.id
+        ) || match
+      );
+    }
+  
+    ctx.patchState({
+      teams: updatedTeams,
+      matches: updatedMatches,
+      currentWeek: totalWeeks + 1, // bittiğinde bir fazlası olur
+    });
+  }
+  
+  private updateStats(teams: Team[], match: Match) {
+    const home = teams.find((t) => t.id === match.homeTeam.id);
+    const away = teams.find((t) => t.id === match.awayTeam.id);
+
     if (home && away) {
       home.matchesPlayed++;
       away.matchesPlayed++;
-  
+
       home.goalDifference += match.homeGoals - match.awayGoals;
       away.goalDifference += match.awayGoals - match.homeGoals;
-  
+
       if (match.homeGoals > match.awayGoals) {
         home.points += 3;
         home.wins++;
@@ -94,11 +166,11 @@ export class LeagueState {
   @Selector()
   static getPlayedMatchesByWeek(state: LeagueStateModel) {
     return (week: number): Match[] =>
-      state.matches.filter(m => m.week === week && m.played);
+      state.matches.filter((m) => m.week === week && m.played);
   }
-  
-@Selector()
-static getCurrentWeek(state: LeagueStateModel): number {
-  return state.currentWeek;
-}
+
+  @Selector()
+  static getCurrentWeek(state: LeagueStateModel): number {
+    return state.currentWeek;
+  }
 }

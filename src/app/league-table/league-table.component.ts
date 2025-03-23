@@ -6,7 +6,7 @@ import { LeagueState } from '../state/league/league.state';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { InitializeLeague, PlayNextWeek } from '../state/league/league.action';
+import { InitializeLeague, PlayAllMatches, PlayNextWeek } from '../state/league/league.action';
 
 @Component({
   selector: 'app-league-table',
@@ -42,7 +42,14 @@ export class LeagueTableComponent implements OnInit {
     
     this.currentMatches$?.subscribe((val)=> console.log(val))
   }
-
+  playAll() {
+    this.store.dispatch(new PlayAllMatches()).subscribe(() => {
+      this.store.selectOnce(LeagueState.getCurrentWeek).subscribe(currentWeek => {
+        this.currentWeek = currentWeek - 1;
+        this.loadMatches();
+      });
+    });
+  }
   loadMatches() {
     const selectorFn = this.store.selectSnapshot(LeagueState.getPlayedMatchesByWeek);
     this.currentMatches$ = of(selectorFn(this.currentWeek));
