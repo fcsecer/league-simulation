@@ -24,9 +24,6 @@ export class LeagueState {
     return state.teams.map(t => ({ ...t })) // REFS broken ✅
       .sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference);
   }
-  
-
-  
 
   // 🔍 Şu haftanın oynanmış maçlarını döndür
   @Selector()
@@ -107,63 +104,10 @@ export class LeagueState {
       currentWeek: totalWeeks + 1,
     });
   }
-
-  @Action(EditMatchResult)
-  editMatchResult(ctx: StateContext<LeagueStateModel>, { payload }: EditMatchResult) {
-    const state = ctx.getState();
-  
-    // 1️⃣ Maçı bul
-    const matchIndex = state.matches.findIndex(
-      m =>
-        m.week === payload.week &&
-        m.homeTeamId === payload.homeTeamId &&
-        m.awayTeamId === payload.awayTeamId
-    );
-  
-    if (matchIndex === -1) return;
-  
-    const updatedMatches = [...state.matches];
-    const oldMatch = updatedMatches[matchIndex];
-  
-    // 2️⃣ Takım listesi kopyalanıyor (immutable)
-    const teamsCopy = state.teams.map(t => ({ ...t }));
-  
-    // 3️⃣ Eski istatistikleri geri al
-    this.revertStats(teamsCopy, oldMatch);
-  
-    // 4️⃣ Yeni skoru ayarla
-    const updatedMatch: Match = {
-      ...oldMatch,
-      homeGoals: payload.homeGoals,
-      awayGoals: payload.awayGoals,
-      played: true
-    };
-  
-    updatedMatches[matchIndex] = updatedMatch;
-  
-    // 5️⃣ Yeni istatistikleri uygula
-    this.updateStats(teamsCopy, updatedMatch);
-    console.log('📊 PatchState Teams:', teamsCopy.map(t => ({ ...t })));
-    // 6️⃣ State’i güncelle
-    ctx.patchState({
-      teams: [...teamsCopy.map(t => ({ ...t }))], // her takım ve array için yeni referans!
-      matches: [...updatedMatches]
-    });
-    
-  }
-  
-
   private updateStats(teams: Team[], match: Match) {
-    const homeIndex = teams.findIndex(t => t.id === match.homeTeamId);
-    const awayIndex = teams.findIndex(t => t.id === match.awayTeamId);
-    if (homeIndex === -1 || awayIndex === -1) return;
-  
-    // Referans kır!
-    teams[homeIndex] = { ...teams[homeIndex] };
-    teams[awayIndex] = { ...teams[awayIndex] };
-  
-    const home = teams[homeIndex];
-    const away = teams[awayIndex];
+    const home = teams.find(t => t.id === match.homeTeamId);
+    const away = teams.find(t => t.id === match.awayTeamId);
+    if (!home || !away) return;
   
     home.matchesPlayed++;
     away.matchesPlayed++;
@@ -185,39 +129,38 @@ export class LeagueState {
       home.draws++;
       away.draws++;
     }
-  
-    console.log('✅ home puanı:', home.points);
-    console.log('🔁 teamsCopy:', teams.map(t => ({ id: t.id, pts: t.points })));
   }
+  @Action(EditMatchResult)
+  editMatchResult(ctx: StateContext<LeagueStateModel>, { payload }: EditMatchResult) {
+    const state = ctx.getState();
+    const matches = [...state.matches];
+    const teams = state.teams.map(t => ({ ...t }));
   
+    const matchIndex = matches.findIndex(m =>
+      m.week === payload.week &&
+      m.homeTeamId === payload.homeTeamId &&
+      m.awayTeamId === payload.awayTeamId
+    );
   
-
-  private revertStats(teams: Team[], match: Match) {
-    const home = teams.find(t => t.id === match.homeTeamId);
-    const away = teams.find(t => t.id === match.awayTeamId);
+    if (matchIndex === -1) return;
+  
+    const oldMatch = matches[matchIndex];
+    const home = teams.find(t => t.id === oldMatch.homeTeamId);
+    const away = teams.find(t => t.id === oldMatch.awayTeamId);
     if (!home || !away) return;
   
-    home.matchesPlayed--;
-    away.matchesPlayed--;
+    // 🔁 Önce eski skorun etkisini sil
+    this.recalculateMatchStats(home, away, oldMatch, payload);
   
-    home.goalDifference -= match.homeGoals - match.awayGoals;
-    away.goalDifference -= match.awayGoals - match.homeGoals;
+    // ✅ Yeni skoru işle
+    matches[matchIndex] = {
+      ...payload,
+      played: true,
+    };
   
-    if (match.homeGoals > match.awayGoals) {
-      home.points -= 3;
-      home.wins--;
-      away.losses--;
-    } else if (match.homeGoals < match.awayGoals) {
-      away.points -= 3;
-      away.wins--;
-      home.losses--;
-    } else {
-      home.points -= 1;
-      away.points -= 1;
-      home.draws--;
-      away.draws--;
-    }
+    ctx.patchState({ teams, matches });
   }
+  
   
 
   @Selector()
@@ -259,5 +202,54 @@ static getPlayedMatchesByWeek(state: LeagueStateModel) {
   return (week: number): Match[] =>
     state.matches.filter(m => m.week === week && m.played);
 }
+private recalculateMatchStats(home: Team, away: Team, oldMatch: Match, newMatch: Match): void {
+  // 🧼 Eski skoru sil
+  home.matchesPlayed--;
+  away.matchesPlayed--;
+
+  const oldDiff = oldMatch.homeGoals - oldMatch.awayGoals;
+  home.goalDifference -= oldDiff;
+  away.goalDifference += oldDiff;
+
+  if (oldDiff > 0) {
+    home.points -= 3;
+    home.wins--;
+    away.losses--;
+  } else if (oldDiff < 0) {
+    away.points -= 3;
+    away.wins--;
+    home.losses--;
+  } else {
+    home.points -= 1;
+    away.points -= 1;
+    home.draws--;
+    away.draws--;
+  }
+
+  // ➕ Yeni skoru uygula
+  home.matchesPlayed++;
+  away.matchesPlayed++;
+
+  const newDiff = newMatch.homeGoals - newMatch.awayGoals;
+  home.goalDifference += newDiff;
+  away.goalDifference -= newDiff;
+
+  if (newDiff > 0) {
+    home.points += 3;
+    home.wins++;
+    away.losses++;
+  } else if (newDiff < 0) {
+    away.points += 3;
+    away.wins++;
+    home.losses++;
+  } else {
+    home.points += 1;
+    away.points += 1;
+    home.draws++;
+    away.draws++;
+  }
+  console.log("home",home)
+}
+
 
 }

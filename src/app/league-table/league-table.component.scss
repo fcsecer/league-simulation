@@ -1,0 +1,86 @@
+// Genel düzen
+.section-title {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 0.5rem;
+  }
+  
+  .toolbar {
+    margin: 1.5rem 0;
+    display: flex;
+    gap: 1rem;
+  }
+  
+  // Maç listesi
+  .match-results {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem 0;
+  
+    li {
+      padding: 0.5rem 0;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+  
+      .team-name {
+        font-weight: 500;
+        min-width: 130px;
+      }
+  
+      .score {
+        font-weight: bold;
+      }
+    }
+  }
+  
+  // Takım tablosu
+  .team-table {
+    margin-top: 1rem;
+  
+    .eliminated {
+      background-color: #ffe5e5 !important;
+    }
+  }
+  
+  // Tahmin tablosu
+  .prediction-table {
+    margin-top: 1rem;
+  }
+  
+  // Edit alanı
+  .editable-matches {
+    margin-top: 1rem;
+  
+    .match-edit-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+  
+      .team-name {
+        font-weight: 500;
+        min-width: 130px;
+      }
+  
+      .score-input {
+        width: 50px;
+        text-align: center;
+        padding: 4px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+  
+      .dash {
+        font-weight: bold;
+      }
+    }
+  }
+  

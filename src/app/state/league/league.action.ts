@@ -18,6 +18,7 @@ export class PlayAllMatches {
 export class PlayNextWeek {
   static readonly type = '[League] Play Next Week';
 }
+
 export class EditMatchResult {
   static readonly type = '[League] Edit Match Result';
   constructor(public payload: Match) {}

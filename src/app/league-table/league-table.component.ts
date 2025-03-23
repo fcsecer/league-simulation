@@ -8,11 +8,12 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { EditMatchResult, InitializeLeague, PlayAllMatches, PlayNextWeek } from '../state/league/league.action';
 import { FormsModule } from '@angular/forms';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 @Component({
   selector: 'app-league-table',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule,FormsModule],
+  imports: [CommonModule, TableModule, ButtonModule,FormsModule,InputNumberModule],
   templateUrl: './league-table.component.html',
 })
 export class LeagueTableComponent implements OnInit {
@@ -39,7 +40,6 @@ export class LeagueTableComponent implements OnInit {
       this.loadEditableMatches();
       this.loadChampionPredictions();
       this.teams$ = this.store.select(LeagueState.getTeams);
-      this.teams$.subscribe((val)=>console.log("first",val))
     });
   }
   playAll() {
@@ -55,17 +55,7 @@ export class LeagueTableComponent implements OnInit {
   playNextWeek() {
     this.store.dispatch(new PlayNextWeek()).subscribe(() => this.reloadAll());
   }
-  
-  editMatch(match: Match) {
-    const updated = {
-      ...match, // homeTeamId, awayTeamId, week vs. zaten var
-      played: true // garanti olsun
-    };
-  
-    this.store.dispatch(new EditMatchResult(updated)).subscribe(() => {
-      this.reloadAll(); // tüm verileri yenile
-    });
-  }
+
   
 
   loadChampionPredictions() {
@@ -98,5 +88,17 @@ export class LeagueTableComponent implements OnInit {
     const teams = this.store.selectSnapshot(LeagueState.getTeams);
     return teams.find(t => t.id === id)?.name || '???';
   }
-
+  
+  editMatch(match: Match) {
+    const updatedMatch: Match = {
+      ...match,
+      played: true
+    };
+    this.store.dispatch(new EditMatchResult(updatedMatch)).subscribe(() => {
+      this.loadMatches();
+      this.loadEditableMatches();
+      this.loadChampionPredictions();
+    });
+  }
+  
 }
