@@ -109,31 +109,31 @@
 }
 
 .editable-matches {
-  margin-top: 1rem;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  background: #fafafa;
-  border: 1px solid #ddd;
-  padding: 1rem;
-  border-radius: 4px;
-  font-size: 0.95rem;
-
   .match-edit-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 0.75rem;
     gap: 0.5rem;
-    flex-wrap: wrap;
 
-    .team-name {
+    .team {
+      width: 35%;
       font-weight: 500;
-      min-width: 100px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .left {
+      text-align: left;
+    }
+
+    .right {
+      text-align: right;
     }
 
     .score-input {
-      width: 40px;
+      width: 50px;
       text-align: center;
       padding: 4px;
       border: 1px solid #ccc;
@@ -143,9 +143,12 @@
 
     .dash {
       font-weight: bold;
+      width: 10px;
+      text-align: center;
     }
   }
 }
+
 
 .full-width-table {
   width: 100%;
@@ -166,21 +169,48 @@
 
 .match-results {
   list-style: none;
-  padding: 0;
-  margin: 1rem 0 0 0;
-  background: #f9f9f9;
+  padding: 1rem;
+  margin: 0;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 0.75rem;
+  border-radius: 8px;
+  background-color: #fff;
 
-  li {
+  .match-row {
     display: flex;
     justify-content: space-between;
-    padding: 0.4rem 0;
+    align-items: center;
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .team {
+      width: 40%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .left {
+      text-align: left;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .score {
+      width: 20%;
+      text-align: center;
+      font-weight: bold;
+    }
   }
 }
+
 
 .match-title {
   font-weight: 600;
@@ -194,4 +224,16 @@
   display: flex;
   justify-content: space-between;
   margin-top: 1rem;
+}
+
+.match-edit-row-wrapper {
+  margin-bottom: 1.5rem;
+
+  .match-week {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.4rem;
+    text-align: center;
+  }
 }
