@@ -1,5 +1,3 @@
-// src/app/state/league/league.actions.ts
-
 import { Match } from "./league.model";
 
 export class InitializeLeague {

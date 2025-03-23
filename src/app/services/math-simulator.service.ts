@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Team, Match } from '../state/league/league.model';
+import { Team, Match } from '../store/league/league.model';
 
 @Injectable({ providedIn: 'root' })
 export class MatchSimulatorService {
