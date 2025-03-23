@@ -1,19 +1,34 @@
-<p-table [value]="(teams$ | async)!" [paginator]="true" [rows]="10">
-    <ng-template pTemplate="header">
-      <tr>
-        <th>Takım</th>
-        <th>Oynanan Maç</th>
-        <th>Puan</th>
-        <th>Averaj</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-team>
-      <tr>
-        <td>{{ team.name }}</td>
-        <td>{{ team.matchesPlayed }}</td>
-        <td>{{ team.points }}</td>
-        <td>{{ team.goalDifference }}</td>
-      </tr>
-    </ng-template>
-  </p-table>
-  
+
+<h2>{{ currentWeek }}. Hafta Maç Sonuçları</h2>
+<ul>
+  <li *ngFor="let match of currentMatches$ | async">
+    {{ match.homeTeam.name }} {{ match.homeGoals }} - {{ match.awayGoals }} {{ match.awayTeam.name }}
+  </li>
+</ul>
+
+<button pButton type="button" label="Sonraki Hafta" (click)="playNextWeek()"></button>
+
+<p-table [value]="(teams$ | async)!">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Takım</th>
+      <th>O</th>
+      <th>G</th>
+      <th>B</th>
+      <th>M</th>
+      <th>Av.</th>
+      <th>Puan</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-team>
+    <tr>
+      <td>{{ team.name }}</td>
+      <td>{{ team.matchesPlayed }}</td>
+      <td>{{ team.wins }}</td>
+      <td>{{ team.draws }}</td>
+      <td>{{ team.losses }}</td>
+      <td>{{ team.goalDifference }}</td>
+      <td>{{ team.points }}</td>
+    </tr>
+  </ng-template>
+</p-table>

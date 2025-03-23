@@ -14,3 +14,7 @@ export class PlayMatch {
 export class PlayAllMatches {
   static readonly type = '[League] Play All Matches';
 }
+
+export class PlayNextWeek {
+  static readonly type = '[League] Play Next Week';
+}
