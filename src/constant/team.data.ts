@@ -81,4 +81,14 @@ export const teams: Team[] = [
       losses: 0,
       draws: 0,
     },
+    {
+      id: 9,
+      name: 'Bursaspor',
+      points: 0,
+      goalDifference: 0,
+      matchesPlayed: 0,
+      wins: 0,
+      losses: 0,
+      draws: 0,
+    },
   ];

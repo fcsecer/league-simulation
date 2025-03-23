@@ -1,32 +1,29 @@
-# 1. Yapı aşaması
-FROM node:18-alpine AS build-stage
+# Stage 1: Build the Angular application
+FROM node:alpine AS build
 
-# Çalışma dizinini ayarla
-WORKDIR /app
+# Setup the working directory
+WORKDIR /usr/src/app
 
-# package.json ve lock dosyasını kopyala
-COPY package*.json ./
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
 
-# Gerekli paketleri yükle
+# Install dependencies
 RUN npm install
 
-# Tüm proje dosyalarını kopyala
+# Copy other files and folders to the working directory
 COPY . .
 
-# Angular uygulamasını production için derle
+# Build Angular application in PROD mode
 RUN npm run build --prod
 
-# 2. Sunucu aşaması
-FROM nginx:alpine AS production-stage
+# Stage 2: Serve the application using Nginx
+FROM nginx:alpine
 
-# Build edilen dosyaları nginx'in public dizinine kopyala
-COPY --from=build-stage /app/dist/league-simulation /usr/share/nginx/html
+# Copy built Angular app files to Nginx HTML folder
+COPY --from=build /usr/src/app/dist/league-simulation /usr/share/nginx/html
 
-# Custom nginx config gerekiyorsa:
-# COPY nginx.conf /etc/nginx/nginx.conf
-
-# 80 portunu aç
+# Expose port 80
 EXPOSE 80
 
-# Nginx'i başlat
+# Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]

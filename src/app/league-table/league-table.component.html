@@ -50,15 +50,13 @@
       </td>
 
       <td>
-        <ul class="match-results">
-          <li *ngFor="let match of currentMatches$ | async">
-            <span class="team-name">{{ getTeamName(match.homeTeamId) }}</span>
-            <span class="score"
-              >{{ match.homeGoals }} - {{ match.awayGoals }}</span
-            >
-            <span class="team-name">{{ getTeamName(match.awayTeamId) }}</span>
-          </li>
-        </ul>
+       <ul class="match-results">
+  <li *ngFor="let match of currentMatches$ | async" class="match-row">
+    <span class="team left">{{ getTeamName(match.homeTeamId) }}</span>
+    <span class="score">{{ match.homeGoals }} - {{ match.awayGoals }}</span>
+    <span class="team right">{{ getTeamName(match.awayTeamId) }}</span>
+  </li>
+</ul>
         <div *ngIf="isFinished$ | async" class="text-center mt-2">
           🏆 Tüm haftalar oynandı. Lig sona erdi.
           <span *ngIf="champion$ | async as champ" class="ml-2">
@@ -123,41 +121,36 @@
       </td>
 
       <td>
-        <div
-          *ngIf="editableMatches$ | async as matches"
-          class="editable-matches"
-        >
-          <div *ngFor="let match of matches" class="match-edit-row">
-            <span class="team-name">{{ getTeamName(match.homeTeamId) }}</span>
-
+        <div 
+        *ngIf="editableMatches$ | async as matches" class="editable-matches">
+        <div *ngFor="let match of matches" class="match-edit-row-wrapper">
+          <div class="match-week">Hafta {{ match.week }}</div>
+        
+          <div class="match-edit-row">
+            <span class="team left">{{ getTeamName(match.homeTeamId) }}</span>
+        
             <input
               type="number"
               [(ngModel)]="match.homeGoals"
               class="score-input"
-              disabled="true"
               min="0"
             />
-
+        
             <span class="dash">-</span>
-
+        
             <input
               type="number"
               [(ngModel)]="match.awayGoals"
               class="score-input"
-              disabled="true"
               min="0"
             />
-
-            <span class="team-name">{{ getTeamName(match.awayTeamId) }}</span>
-
-            <!-- <button
-              pButton
-              icon="pi pi-check"
-              class="p-button-sm p-button-success ml-2"
-              (click)="editMatch(match)"
-            ></button> -->
+        
+            <span class="team right">{{ getTeamName(match.awayTeamId) }}</span>
           </div>
         </div>
+        
+        </div>
+        
       </td>
     </tr>
 
