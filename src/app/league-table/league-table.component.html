@@ -1,0 +1,165 @@
+<table class="full-width-table">
+  <thead>
+    <tr>
+      <th>Puan Durumu</th>
+      <th>Maç Sonuçları<br />STS {{ currentWeek -1 }}. Hafta Maç Sonuçları</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <div *ngIf="teams$ | async as teams">
+          <p-table
+            [value]="teams"
+            stripedRows
+            [responsiveLayout]="'scroll'"
+            class="standings-table team-table"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Takım</th>
+                <th>O</th>
+                <th>G</th>
+                <th>B</th>
+                <th>M</th>
+                <th>Av.</th>
+                <th>Puan</th>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-team>
+              <tr
+                [ngClass]="{ eliminated: championChances.get(team.id) === 0 }"
+                [title]="
+                  championChances.get(team.id) === 0
+                    ? 'Şampiyonluk şansı kalmadı'
+                    : ''
+                "
+              >
+                <td>{{ team.name }}</td>
+                <td>{{ team.matchesPlayed }}</td>
+                <td>{{ team.wins }}</td>
+                <td>{{ team.draws }}</td>
+                <td>{{ team.losses }}</td>
+                <td>{{ team.goalDifference }}</td>
+                <td>{{ team.points }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </td>
+
+      <td>
+        <ul class="match-results">
+          <li *ngFor="let match of currentMatches$ | async">
+            <span class="team-name">{{ getTeamName(match.homeTeamId) }}</span>
+            <span class="score"
+              >{{ match.homeGoals }} - {{ match.awayGoals }}</span
+            >
+            <span class="team-name">{{ getTeamName(match.awayTeamId) }}</span>
+          </li>
+        </ul>
+        <div *ngIf="isFinished$ | async" class="text-center mt-2">
+          🏆 Tüm haftalar oynandı. Lig sona erdi.
+          <span *ngIf="champion$ | async as champ" class="ml-2">
+            Şampiyon: <strong>{{ champ.name }}</strong>
+          </span>
+        </div>
+        
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <div class="next-week-button">
+          <p-button
+            type="button"
+            label="Reset Lig"
+            (click)="resetLeague()"
+            class="p-button-danger"
+            severity="danger"
+          />
+          <p-button label="Tüm Ligi Oynat" (click)="playAll()" severity="info"/>
+          <p-button
+            label="Sonraki Hafta"
+            severity="secondary"
+            (click)="playNextWeek()"
+            [disabled]="isFinished$ | async"
+          />
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table class="full-width-table">
+  <thead>
+    <tr>
+      <th>{{ currentWeek -1 }}. Hafta Şampiyonluk Tahminleri</th>
+      <th>Oynanmış Maçlar</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <div class="prediction-table-container">
+          <!-- Şampiyonluk tahmin tablosu -->
+          <div *ngIf="championPredictions$ | async as predictions">
+            <p-table [value]="predictions" class="prediction-table">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Takım</th>
+                  <th>Şampiyonluk İhtimali</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-row>
+                <tr>
+                  <td>{{ row.team.name }}</td>
+                  <td>%{{ row.chance }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+      </td>
+
+      <td>
+        <div
+          *ngIf="editableMatches$ | async as matches"
+          class="editable-matches"
+        >
+          <div *ngFor="let match of matches" class="match-edit-row">
+            <span class="team-name">{{ getTeamName(match.homeTeamId) }}</span>
+
+            <input
+              type="number"
+              [(ngModel)]="match.homeGoals"
+              class="score-input"
+              disabled="true"
+              min="0"
+            />
+
+            <span class="dash">-</span>
+
+            <input
+              type="number"
+              [(ngModel)]="match.awayGoals"
+              class="score-input"
+              disabled="true"
+              min="0"
+            />
+
+            <span class="team-name">{{ getTeamName(match.awayTeamId) }}</span>
+
+            <!-- <button
+              pButton
+              icon="pi pi-check"
+              class="p-button-sm p-button-success ml-2"
+              (click)="editMatch(match)"
+            ></button> -->
+          </div>
+        </div>
+      </td>
+    </tr>
+
+  </tbody>
+</table>
