@@ -9,6 +9,6 @@ import { LeagueTableComponent } from './league-table/league-table.component';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'league-simulator';
+  title = 'League Simulator';
   
 }

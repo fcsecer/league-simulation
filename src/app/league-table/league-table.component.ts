@@ -19,13 +19,19 @@ import { InputNumberModule } from 'primeng/inputnumber';
 })
 export class LeagueTableComponent implements OnInit {
   teams$: Observable<Team[]>;
+  isFinished$: Observable<Boolean>;
+  champion$: Observable<Team |null>;
   currentMatches$: Observable<Match[]> | undefined;
   currentWeek: number = 1;
   championPredictions$: Observable<{ team: Team; chance: number; }[]> | undefined;
   championChances: Map<number, number> = new Map();
   editableMatches$: Observable<Match[]> | undefined;
+  
   constructor(private store: Store) {
     this.teams$ = this.store.select(LeagueState.getTeams);
+    this.isFinished$ = this.store.select(LeagueState.isLeagueFinished);
+    this.champion$ = this.store.select(LeagueState.getChampion);
+
   }
 
   ngOnInit() {

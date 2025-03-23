@@ -284,6 +284,25 @@ export class LeagueState {
       home.draws++;
       away.draws++;
     }
-    console.log('home', home);
   }
+  @Selector()
+static isLeagueFinished(state: LeagueStateModel): boolean {
+  const totalWeeks = Math.max(...state.matches.map(m => m.week));
+  return state.currentWeek > totalWeeks;
+}
+@Selector()
+static getChampion(state: LeagueStateModel): Team | null {
+  const playedMatches = state.matches.filter(m => m.played);
+  const totalWeeks = Math.max(...state.matches.map(m => m.week));
+  const allWeeksPlayed = playedMatches.length > 0 && state.currentWeek > totalWeeks;
+
+  if (!allWeeksPlayed) return null;
+
+  const sorted = [...state.teams].sort(
+    (a, b) => b.points - a.points || b.goalDifference - a.goalDifference
+  );
+
+  return sorted[0] || null;
+}
+
 }

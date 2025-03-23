@@ -2,7 +2,7 @@
   <thead>
     <tr>
       <th>Puan Durumu</th>
-      <th>Maç Sonuçları<br />STS {{ currentWeek }}. Hafta Maç Sonuçları</th>
+      <th>Maç Sonuçları<br />STS {{ currentWeek -1 }}. Hafta Maç Sonuçları</th>
     </tr>
   </thead>
   <tbody>
@@ -59,6 +59,13 @@
             <span class="team-name">{{ getTeamName(match.awayTeamId) }}</span>
           </li>
         </ul>
+        <div *ngIf="isFinished$ | async" class="text-center mt-2">
+          🏆 Tüm haftalar oynandı. Lig sona erdi.
+          <span *ngIf="champion$ | async as champ" class="ml-2">
+            Şampiyon: <strong>{{ champ.name }}</strong>
+          </span>
+        </div>
+        
       </td>
     </tr>
 
@@ -70,13 +77,14 @@
             label="Reset Lig"
             (click)="resetLeague()"
             class="p-button-danger"
-            severity="secondary"
+            severity="danger"
           />
-          <p-button label="Tüm Ligi Oynat" (click)="playAll()" severity="secondary"/>
+          <p-button label="Tüm Ligi Oynat" (click)="playAll()" severity="info"/>
           <p-button
             label="Sonraki Hafta"
             severity="secondary"
             (click)="playNextWeek()"
+            [disabled]="isFinished$ | async"
           />
         </div>
       </td>
@@ -86,7 +94,7 @@
 <table class="full-width-table">
   <thead>
     <tr>
-      <th>{{ currentWeek }}. Hafta Şampiyonluk Tahminleri</th>
+      <th>{{ currentWeek -1 }}. Hafta Şampiyonluk Tahminleri</th>
       <th>Oynanmış Maçlar</th>
     </tr>
   </thead>
